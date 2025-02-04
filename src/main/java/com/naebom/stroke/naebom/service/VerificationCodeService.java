@@ -28,7 +28,7 @@ public class VerificationCodeService {
         saveCodeToRedis(email, code); // Redis에 인증 코드 저장
         sendEmail(email, code); // 이메일 발송
 
-        return code; // 생성된 인증 코드 반환 (디버깅용)
+        return code;// 생성된 인증 코드 반환 (디버깅용)
     }
 
     // 인증 코드 검증

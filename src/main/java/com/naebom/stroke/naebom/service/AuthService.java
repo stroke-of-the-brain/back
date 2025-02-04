@@ -23,7 +23,7 @@ public class AuthService {
 
     // 회원가입
     public void signup(SignupRequestDto requestDto) {
-        // 이메일 있는지 없는지 체크
+        // 이메일 있는지 없는지 확인
         if (memberRepository.findByEmail(requestDto.getEmail()).isPresent()) {
             throw new IllegalArgumentException("이미 존재하는 이메일입니다.");
         }

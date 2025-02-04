@@ -10,7 +10,6 @@ public class SignupRequestDto {
     private String birthDate; // 생년월일 (YYYY-MM-DD)
     private String gender;
 
-    // Getters and Setters
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
 

@@ -7,4 +7,4 @@
 | chore       |  패키지 버전 업데이트      |
 | test     | test 코드         |
 | delete    | 삭제               |
-|Refactor | 리펙토링             | 
+|Refactor | 리펙토링             |  

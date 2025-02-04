@@ -11,7 +11,7 @@ import java.util.Date;
 public class JwtTokenProvider {
 
     private String secretKey;
-    private final long validityInMilliseconds = 86400000; // 24시간
+    private final long validityInMilliseconds = 86400000;// 24시간
 
     public JwtTokenProvider(@Value("${jwt.secret}") String secretKey) {
         this.secretKey = Base64.getEncoder().encodeToString(secretKey.getBytes()); // Base64 인코딩

@@ -32,7 +32,7 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 
-    // 회원가입 (인증 코드 검증 포함)
+    //회원가입 (인증 코드 검증 포함)
     @PostMapping("/signup")
     public ResponseEntity<Map<String, String>> signup(@RequestBody SignupRequestDto requestDto) {
         try {

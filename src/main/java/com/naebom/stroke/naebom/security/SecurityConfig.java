@@ -36,7 +36,7 @@ public class SecurityConfig {
                     return config;
                 }))
                 .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS) // JWT 사용 시 세션 비활
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS) //JWT 사용 시 세션 비활
                 );
 
         return http.build();

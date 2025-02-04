@@ -10,7 +10,7 @@ import java.util.Properties;
 @Configuration
 public class MailConfig {
 
-    @Bean// 이메일을 보낼 수 있도록 지원하는 스프링 메일 API
+    @Bean//이메일을 보낼 수 있도록 지원하는 스프링 메일 API
     public JavaMailSender javaMailSender() {
         JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
         mailSender.setHost("smtp.gmail.com");
