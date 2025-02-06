@@ -4,17 +4,21 @@ import io.jsonwebtoken.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Date;
+import java.util.logging.Logger;
 
 @Component
 public class JwtTokenProvider {
 
-    private String secretKey;
+    private static final Logger logger = Logger.getLogger(JwtTokenProvider.class.getName());
+
+    private final String secretKey;
     private final long validityInMilliseconds = 86400000; // 24시간
 
     public JwtTokenProvider(@Value("${jwt.secret}") String secretKey) {
-        this.secretKey = Base64.getEncoder().encodeToString(secretKey.getBytes()); // Base64 인코딩
+        this.secretKey = Base64.getEncoder().encodeToString(secretKey.getBytes(StandardCharsets.UTF_8)); // Base64 인코딩
     }
 
     public String generateToken(String email) {
@@ -33,9 +37,18 @@ public class JwtTokenProvider {
                     .build()
                     .parseClaimsJws(token);
             return true;
-        } catch (JwtException | IllegalArgumentException e) {
-            return false;
+        } catch (ExpiredJwtException e) {
+            logger.warning("JWT 토큰이 만료되었습니다: " + e.getMessage());
+        } catch (UnsupportedJwtException e) {
+            logger.warning("지원되지 않는 JWT 토큰입니다: " + e.getMessage());
+        } catch (MalformedJwtException e) {
+            logger.warning("잘못된 형식의 JWT 토큰입니다: " + e.getMessage());
+        } catch (SignatureException e) {
+            logger.warning("JWT 서명이 올바르지 않습니다: " + e.getMessage());
+        } catch (IllegalArgumentException e) {
+            logger.warning("JWT 토큰이 비어있거나 잘못되었습니다: " + e.getMessage());
         }
+        return false;
     }
 
     public String getEmailFromToken(String token) {
