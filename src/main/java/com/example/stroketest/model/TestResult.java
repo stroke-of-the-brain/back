@@ -10,23 +10,17 @@ public class TestResult {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private double reactionTime;
-    private int facialParalysis; // 0~100 (안면 마비 위험도)
-    private int speechImpairment; // 0~100 (발음 장애 위험도)
-    private double strokeProbability;
+    private double result;  // 개별 검사 결과 값
+
+    @ManyToOne
+    @JoinColumn(name = "test_item_id", nullable = false)
+    private TestItem testItem;  // 테스트 항목을 나타내는 외래 키
 
     public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
 
-    public double getReactionTime() { return reactionTime; }
-    public void setReactionTime(double reactionTime) { this.reactionTime = reactionTime; }
+    public double getResult() { return result; }
+    public void setResult(double result) { this.result = result; }
 
-    public int getFacialParalysis() { return facialParalysis; }
-    public void setFacialParalysis(int facialParalysis) { this.facialParalysis = facialParalysis; }
-
-    public int getSpeechImpairment() { return speechImpairment; }
-    public void setSpeechImpairment(int speechImpairment) { this.speechImpairment = speechImpairment; }
-
-    public double getStrokeProbability() { return strokeProbability; }
-    public void setStrokeProbability(double strokeProbability) { this.strokeProbability = strokeProbability; }
+    public TestItem getTestItem() { return testItem; }
+    public void setTestItem(TestItem testItem) { this.testItem = testItem; }
 }
