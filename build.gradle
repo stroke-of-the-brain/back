@@ -20,11 +20,9 @@ configurations {
 }
 
 repositories {
-	/*flatDir {
-		dirs 'libs' // 프로젝트의 libs 폴더를 라이브러리 경로로 추가
-	}*/
-	mavenLocal()  // 로컬 저장소 추가
-	mavenCentral()  // 기본 저장소
+	mavenCentral()
+	maven { url 'https://repo1.maven.org/maven2/' } // Maven Central 대체
+	maven { url "https://maven.google.com" } // Google Maven 저장소 추가
 }
 
 dependencies {
@@ -33,13 +31,13 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'com.google.maps:google-maps-services:2.1.0'
-	implementation 'org.apache.commons:commons-text:1.10.0'
-	implementation 'commons-io:commons-io:2.11.0'
-	implementation 'org.slf4j:slf4j-api:2.0.7'
-	//implementation 'com.microsoft.cognitiveservices.speech:client-sdk:1.42.0'
-	//implementation group: 'com.microsoft.cognitiveservices.speech', name: 'client-sdk', version: '1.42.0'
-	implementation files("/Users/heosejin222gmail.com/.m2/repository/com/microsoft/cognitiveservices/speech/client-sdk/1.42.0/client-sdk-1.42.0.jar")
+	implementation 'com.google.cloud:google-cloud-speech:2.17.0' // Google Cloud STT
+	implementation 'org.apache.commons:commons-text:1.10.0' // Levenshtein 거리 계산용
+	implementation 'commons-io:commons-io:2.11.0' // 파일 저장 용도
+	implementation platform('com.google.cloud:libraries-bom:26.21.0')
+	implementation 'com.google.cloud:google-cloud-speech'
 
+	implementation 'com.google.auth:google-auth-library-oauth2-http:1.19.0'  // GoogleCredentials 관련 라이브러리 추가
 
 	// JWT
 	implementation 'io.jsonwebtoken:jjwt-api:0.11.5'

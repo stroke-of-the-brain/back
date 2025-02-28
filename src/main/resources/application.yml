@@ -27,10 +27,7 @@ spring:
           starttls:
             enable: true
         debug: true
-azure:
-  speech:
-    key: $AZURE_SPEECH_KEY
-    region: $AZURE_SPEECH_REGION
+
 jwt:
   secret: "secret_key_secret_key_secret_key"
 
@@ -49,3 +46,6 @@ cors:
 google:
   maps:
     api-key: AIzaSyAuQNhpD_ilIrQ6nUv9GS7VzaPd9ZbtTEo
+  cloud:
+    credentials:
+      location: classpath:google-cloud-key.json
