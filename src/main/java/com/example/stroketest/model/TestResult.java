@@ -10,17 +10,47 @@ public class TestResult {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private double result;  // 개별 검사 결과 값
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     @ManyToOne
     @JoinColumn(name = "test_item_id", nullable = false)
-    private TestItem testItem;  // 테스트 항목을 나타내는 외래 키
+    private TestItem testItem;
 
-    public Long getId() { return id; }
+    private double reactionTime;
+    private double facialParalysis;
+    private double speechImpairment;
 
-    public double getResult() { return result; }
-    public void setResult(double result) { this.result = result; }
+    public double getReactionTime() {
+        return reactionTime;
+    }
 
-    public TestItem getTestItem() { return testItem; }
-    public void setTestItem(TestItem testItem) { this.testItem = testItem; }
+    public double getFacialParalysis() {
+        return facialParalysis;
+    }
+
+    public double getSpeechImpairment() {
+        return speechImpairment;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public void setTestItem(TestItem testItem) {
+        this.testItem = testItem;
+    }
+
+    public void setReactionTime(double reactionTime) {
+        this.reactionTime = reactionTime;
+    }
+
+    public void setFacialParalysis(double facialParalysis) {
+        this.facialParalysis = facialParalysis;
+    }
+
+    public void setSpeechImpairment(double speechImpairment) {
+        this.speechImpairment = speechImpairment;
+    }
 }

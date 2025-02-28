@@ -37,3 +37,13 @@ dependencies {
 tasks.named('test') {
     useJUnitPlatform()
 }
+dependencies {
+    // Spring Boot Web (REST API)
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+
+    // Spring Boot JPA (DB 저장)
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+
+    // MySQL Connector (DB 연결)
+    runtimeOnly 'mysql:mysql-connector-java'
+}
