@@ -20,9 +20,8 @@ configurations {
 }
 
 repositories {
-	mavenCentral()
-	maven { url 'https://repo1.maven.org/maven2/' } // Maven Central 대체
-	maven { url "https://maven.google.com" } // Google Maven 저장소 추가
+	mavenCentral() // Maven Central 추가
+	maven { url "https://maven.google.com" } //Google Maven 저장소 추가
 }
 
 dependencies {
@@ -31,13 +30,15 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'com.google.maps:google-maps-services:2.1.0'
-	implementation 'com.google.cloud:google-cloud-speech:2.17.0' // Google Cloud STT
 	implementation 'org.apache.commons:commons-text:1.10.0' // Levenshtein 거리 계산용
 	implementation 'commons-io:commons-io:2.11.0' // 파일 저장 용도
-	implementation platform('com.google.cloud:libraries-bom:26.21.0')
-	implementation 'com.google.cloud:google-cloud-speech'
 
-	implementation 'com.google.auth:google-auth-library-oauth2-http:1.19.0'  // GoogleCredentials 관련 라이브러리 추가
+	// Google Cloud BOM 적용
+	implementation platform('com.google.cloud:libraries-bom:26.21.0')
+
+	// 버전 명시 없이 BOM에 의해 관리됨
+	implementation 'com.google.cloud:google-cloud-speech'
+	implementation 'com.google.auth:google-auth-library-oauth2-http'  // GoogleCredentials 관련 라이브러리 추가
 
 	// JWT
 	implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
