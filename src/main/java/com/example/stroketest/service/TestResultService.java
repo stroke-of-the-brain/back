@@ -53,3 +53,4 @@ public class TestResultService {
         return new Random().nextDouble();
     }
 }
+
