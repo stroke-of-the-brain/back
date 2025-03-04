@@ -47,5 +47,4 @@ google:
   maps:
     api-key: AIzaSyAuQNhpD_ilIrQ6nUv9GS7VzaPd9ZbtTEo
   cloud:
-    credentials:
-      location: classpath:google-cloud-key.json
+    credentials: "/Users/heosejin222gmail.com/Desktop/내봄/naebom 2/src/main/resources/google-cloud-key.json"
