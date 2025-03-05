@@ -1,6 +1,7 @@
 package com.example.stroketest.service;
 
 import com.example.stroketest.dto.TestResultRequest;
+import com.example.stroketest.dto.TestResultResponse;
 import com.example.stroketest.exception.ResourceNotFoundException;
 import com.example.stroketest.model.TestItem;
 import com.example.stroketest.model.TestResult;
@@ -9,7 +10,6 @@ import com.example.stroketest.repository.TestItemRepository;
 import com.example.stroketest.repository.TestResultRepository;
 import com.example.stroketest.repository.UserRepository;
 import org.springframework.stereotype.Service;
-import java.util.Random;
 
 @Service
 public class TestResultService {
@@ -24,33 +24,34 @@ public class TestResultService {
         this.userRepository = userRepository;
     }
 
-    public TestResult saveTestResult(TestResultRequest request) {
+    public TestResultResponse getTestResult(TestResultRequest request) {
+        System.out.println("Received request: id=" + request.getId() + ", userId=" + request.getUserId() +
+                ", testItemId=" + request.getTestItemId() + ", username=" + request.getUsername());
+
+        System.out.println("Finding user with id: " + request.getUserId());
         User user = userRepository.findById(request.getUserId())
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id " + request.getUserId()));
+        System.out.println("Found user: " + user.getUsername());
 
+        // username 검증 (선택적)
+        if (!user.getUsername().equals(request.getUsername())) {
+            System.out.println("Username mismatch: expected=" + user.getUsername() + ", received=" + request.getUsername());
+        }
+
+        System.out.println("Finding test item with id: " + request.getTestItemId());
         TestItem testItem = testItemRepository.findById(request.getTestItemId())
                 .orElseThrow(() -> new ResourceNotFoundException("TestItem not found with id " + request.getTestItemId()));
+        System.out.println("Found test item: " + testItem.getName());
 
-        TestResult testResult = new TestResult();
-        testResult.setUser(user);
-        testResult.setTestItem(testItem);
-        testResult.setReactionTime(generateRandomReactionTime());
-        testResult.setFacialParalysis(generateRandomFacialParalysis());
-        testResult.setSpeechImpairment(generateRandomSpeechImpairment());
+        System.out.println("Finding test result for userId: " + request.getUserId() + ", testItemId: " + request.getTestItemId());
+        TestResult testResult = testResultRepository.findByUserAndTestItem(user, testItem)
+                .orElseThrow(() -> new ResourceNotFoundException("Test result not found for userId " + request.getUserId() + " and testItemId " + request.getTestItemId()));
+        System.out.println("Found test result: " + testResult.getReactionTime());
 
-        return testResultRepository.save(testResult);
-    }
-
-    private double generateRandomReactionTime() {
-        return new Random().nextDouble() * 10;
-    }
-
-    private double generateRandomFacialParalysis() {
-        return new Random().nextDouble();
-    }
-
-    private double generateRandomSpeechImpairment() {
-        return new Random().nextDouble();
+        return new TestResultResponse(
+                testResult.getReactionTime(),
+                testResult.getFacialParalysis(),
+                testResult.getSpeechImpairment()
+        );
     }
 }
-

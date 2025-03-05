@@ -22,6 +22,9 @@ public class TestResult {
     private double facialParalysis;
     private double speechImpairment;
 
+    @Column(name = "created_at", updatable = false, insertable = false)
+    private java.sql.Timestamp createdAt;
+
     public double getReactionTime() {
         return reactionTime;
     }
@@ -52,5 +55,9 @@ public class TestResult {
 
     public void setSpeechImpairment(double speechImpairment) {
         this.speechImpairment = speechImpairment;
+    }
+
+    public java.sql.Timestamp getCreatedAt() {
+        return createdAt;
     }
 }
