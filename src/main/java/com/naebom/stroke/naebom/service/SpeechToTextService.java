@@ -1,158 +1,103 @@
 package com.naebom.stroke.naebom.service;
 
-import com.google.api.gax.longrunning.OperationFuture;
 import com.google.cloud.speech.v1.*;
 import com.google.protobuf.ByteString;
+import com.naebom.stroke.naebom.utils.LevenshteinUtil;
+import lombok.RequiredArgsConstructor;
+import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
-import java.nio.file.Files;
-import java.util.Base64;
 
+@RequiredArgsConstructor
 @Service
 public class SpeechToTextService {
 
     private static final Logger logger = LoggerFactory.getLogger(SpeechToTextService.class);
+    private static final int SAMPLE_RATE = 16000; // 표준 음성 샘플 레이트
 
-    public String transcribeSpeech(String base64Audio) {
-        File tempAudioFile = null;
-        File convertedAudioFile = null;
+    /**Base64 오디오 데이터를 받아 STT 변환 후 유사도 점수 계산*/
+    public double evaluateSpeech(String base64Audio, String expectedText) {
+        File audioFile = null;
         try {
-            // Base64 디코딩하여 M4A 파일로 저장
-            tempAudioFile = File.createTempFile("temp_audio", ".m4a");
-            try (FileOutputStream fos = new FileOutputStream(tempAudioFile)) {
-                byte[] audioBytes = Base64.getDecoder().decode(base64Audio);
-                fos.write(audioBytes);
+            // Base64 → FLAC 변환
+            audioFile = convertBase64ToFlac(base64Audio);
+
+            if (audioFile.length() == 0) {
+                logger.error("변환된 FLAC 파일 크기 - 0바이트");
+                return 0;
             }
 
-            System.out.println("생성된 M4A 오디오 파일 경로: " + tempAudioFile.getAbsolutePath());
-            System.out.println("생성된 M4A 오디오 파일 크기: " + tempAudioFile.length() + " bytes");
+            //Google Speech API 호출하여 음성 → 텍스트 변환
+            String recognizedText = transcribeSpeech(audioFile);
 
-            // 파일이 0바이트인지 확인
-            if (tempAudioFile.length() == 0) {
-                throw new RuntimeException("오류: Base64 디코딩 후 M4A 파일 크기가 0바이트입니다. 인코딩 문제 가능.");
+            if (recognizedText.isEmpty()) {
+                logger.warn("음성이 감지X");
+                return 0;
             }
 
-            // M4A → WAV 변환
-            convertedAudioFile = convertToWav(tempAudioFile);
+            //Levenshtein 거리 계산을 통한 유사도 점수 반환
+            int distance = LevenshteinUtil.levenshteinDistance(expectedText, recognizedText);
+            int maxLength = Math.max(expectedText.length(), recognizedText.length());
+            double score = Math.max(0, 100 - ((double) distance / maxLength * 100));
 
-            // Google Cloud Speech-to-Text API 호출
-            return recognizeSpeech(convertedAudioFile);
+            logger.info("평가 완료: 예상='{}', 인식된='{}', 점수={}", expectedText, recognizedText, score);
+            return score;
 
         } catch (Exception e) {
-            logger.error("STT 변환 실패: {}", e.getMessage());
-            return "";
+            logger.error("STT 평가 중 오류 발생: {}", e.getMessage(), e);
+            return 0;
         } finally {
-            // 생성된 파일 정리
-            deleteFile(tempAudioFile);
-            deleteFile(convertedAudioFile);
+            deleteFile(audioFile);
         }
     }
 
-    /**
-     * M4A → WAV 변환 (FFmpeg 사용)
-     */
-    private File convertToWav(File audioFile) throws Exception {
-        File convertedFile = File.createTempFile("converted_audio", ".wav");
+    /**Base64 인코딩된 오디오 데이터를 FLAC 파일로 변환*/
+    private File convertBase64ToFlac(String base64Audio) throws Exception {
+        byte[] audioBytes = Base64.decodeBase64(base64Audio);
+        File flacFile = File.createTempFile("converted_audio", ".flac");
 
-        // FFmpeg 실행 명령어
-        ProcessBuilder builder = new ProcessBuilder(
-                "/usr/homebrew/bin/ffmpeg", // FFmpeg 실행 경로 (Mac에서는 /opt/homebrew/bin/ffmpeg일 수도 있음)
-                "-y",                     // 기존 파일 덮어쓰기
-                "-i", audioFile.getAbsolutePath(), // 입력 파일
-                "-ac", "1",               // 모노 채널
-                "-ar", "16000",           // 16kHz 샘플링 레이트
-                "-acodec", "pcm_s16le",   // LINEAR16 (PCM 16-bit)
-                convertedFile.getAbsolutePath()
-        );
-        builder.redirectErrorStream(true);
-
-        Process process = builder.start();
-
-        // FFmpeg 실행 로그 출력
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
-            String line;
-            System.out.println("FFmpeg 변환 로그:");
-            while ((line = reader.readLine()) != null) {
-                System.out.println(line);
-            }
+        try (FileOutputStream fos = new FileOutputStream(flacFile)) {
+            fos.write(audioBytes);
         }
 
-        process.waitFor();
-
-        // 변환된 파일 검증
-        if (convertedFile.length() == 0) {
-            throw new RuntimeException("FFmpeg 변환 실패: 올바른 WAV 파일이 생성되지 않음.");
-        }
-
-        System.out.println("변환된 WAV 오디오 파일 경로: " + convertedFile.getAbsolutePath());
-        System.out.println("변환된 WAV 오디오 파일 크기: " + convertedFile.length() + " bytes");
-
-        return convertedFile;
+        logger.info("변환된 FLAC 파일 저장 완료: {}, 크기: {} bytes", flacFile.getAbsolutePath(), flacFile.length());
+        return flacFile;
     }
 
-    /**
-     * Google Cloud Speech API로 STT 변환 요청
-     */
-    private String recognizeSpeech(File audioFile) throws Exception {
+    /** Google Cloud Speech API를 사용하여 STT 변환*/
+    private String transcribeSpeech(File audioFile) throws Exception {
         try (SpeechClient speechClient = SpeechClient.create()) {
-            byte[] audioBytes = Files.readAllBytes(audioFile.toPath());
+            byte[] audioBytes = new FileInputStream(audioFile).readAllBytes();
             ByteString audioData = ByteString.copyFrom(audioBytes);
 
-            System.out.println("STT 요청: 오디오 파일 크기 " + audioFile.length() + " bytes");
-
-            // STT 설정
             RecognitionConfig config = RecognitionConfig.newBuilder()
-                    .setEncoding(RecognitionConfig.AudioEncoding.LINEAR16)
-                    .setSampleRateHertz(16000)
-                    .setLanguageCode("en-US")
+                    .setEncoding(RecognitionConfig.AudioEncoding.FLAC) // FLAC 포맷 사용
+                    .setSampleRateHertz(SAMPLE_RATE) // 16kHz 설정
+                    .setLanguageCode("ko-KR") // 한국어 설정
                     .build();
 
             RecognitionAudio audio = RecognitionAudio.newBuilder().setContent(audioData).build();
+            RecognizeResponse response = speechClient.recognize(config, audio);
 
-            System.out.println("Google Cloud Speech API 요청 전송 중...");
-
-            // 비동기 요청 (longRunningRecognize)
-            OperationFuture<LongRunningRecognizeResponse, LongRunningRecognizeMetadata> response =
-                    speechClient.longRunningRecognizeAsync(config, audio);
-
-            System.out.println("비동기 응답 대기 중...");
-            LongRunningRecognizeResponse longResponse = response.get();
-
-            System.out.println("Google Cloud Speech API 응답 수신 완료!");
-
-            if (longResponse.getResultsList().isEmpty()) {
-                System.out.println("STT 변환 결과 없음: API에서 응답을 받지 못함.");
+            // 응답 확인 및 상세 로그 추가
+            if (response.getResultsList().isEmpty()) {
+                logger.warn("변환된 텍스트가 없습니다.");
                 return "";
             }
 
-            StringBuilder transcript = new StringBuilder();
-            for (SpeechRecognitionResult result : longResponse.getResultsList()) {
-                if (result.getAlternativesCount() > 0) {
-                    transcript.append(result.getAlternatives(0).getTranscript()).append(" ");
-                }
-            }
-
-            String resultText = transcript.toString().trim();
-            System.out.println("변환된 텍스트(STT 결과): " + resultText);
-
-            return resultText;
+            String transcript = response.getResultsList().get(0).getAlternatives(0).getTranscript();
+            logger.info("변환된 텍스트: {}", transcript);
+            return transcript;
         }
     }
 
-    /**
-     * 파일 삭제 메서드 (안전한 파일 정리)
-     */
-    private void deleteFile(File file) {
-        if (file != null && file.exists()) {
-            try {
-                Files.deleteIfExists(file.toPath());
-                System.out.println("삭제된 파일: " + file.getAbsolutePath());
-            } catch (IOException e) {
-                System.out.println("파일 삭제 실패: " + file.getAbsolutePath());
-            }
+    /**파일 삭제*/
+   private void deleteFile(File file) {
+        if (file != null && file.exists() && file.delete()) {
+            logger.info("삭제된 파일: {}", file.getAbsolutePath());
         }
     }
 }
