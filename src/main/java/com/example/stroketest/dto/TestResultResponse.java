@@ -1,25 +1,46 @@
 package com.example.stroketest.dto;
 
+import java.sql.Timestamp;
+
 public class TestResultResponse {
-    private double reactionTime;
-    private double facialParalysis;
-    private double speechImpairment;
+    private double facialPercentage;
+    private double touchPercentage;
+    private double speechPercentage;
+    private Timestamp testDate;
+    private double overallPercentage;
+    private Double previousOverallPercentage;
 
-    public TestResultResponse(double reactionTime, double facialParalysis, double speechImpairment) {
-        this.reactionTime = reactionTime;
-        this.facialParalysis = facialParalysis;
-        this.speechImpairment = speechImpairment;
+    public TestResultResponse(double facialPercentage, double touchPercentage, double speechPercentage,
+                              Timestamp testDate, double overallPercentage, Double previousOverallPercentage) {
+        this.facialPercentage = facialPercentage;
+        this.touchPercentage = touchPercentage;
+        this.speechPercentage = speechPercentage;
+        this.testDate = testDate;
+        this.overallPercentage = overallPercentage;
+        this.previousOverallPercentage = previousOverallPercentage;
     }
 
-    public double getReactionTime() {
-        return reactionTime;
+    public double getFacialPercentage() {
+        return facialPercentage;
     }
 
-    public double getFacialParalysis() {
-        return facialParalysis;
+    public double getTouchPercentage() {
+        return touchPercentage;
     }
 
-    public double getSpeechImpairment() {
-        return speechImpairment;
+    public double getSpeechPercentage() {
+        return speechPercentage;
+    }
+
+    public Timestamp getTestDate() {
+        return testDate;
+    }
+
+    public double getOverallPercentage() {
+        return overallPercentage;
+    }
+
+    public Double getPreviousOverallPercentage() {
+        return previousOverallPercentage;
     }
 }

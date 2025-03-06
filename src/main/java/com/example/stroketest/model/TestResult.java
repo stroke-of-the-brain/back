@@ -37,6 +37,10 @@ public class TestResult {
         return speechImpairment;
     }
 
+    public java.sql.Timestamp getCreatedAt() {
+        return createdAt;
+    }
+
     public void setUser(User user) {
         this.user = user;
     }
@@ -55,9 +59,5 @@ public class TestResult {
 
     public void setSpeechImpairment(double speechImpairment) {
         this.speechImpairment = speechImpairment;
-    }
-
-    public java.sql.Timestamp getCreatedAt() {
-        return createdAt;
     }
 }

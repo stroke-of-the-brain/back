@@ -16,11 +16,10 @@ public class TestResultController {
         this.testResultService = testResultService;
     }
 
-    @PostMapping
-    public ResponseEntity<TestResultResponse> getTestResult(@RequestBody TestResultRequest request) {
-        System.out.println("Received request: id=" + request.getId() + ", userId=" + request.getUserId() +
-                ", testItemId=" + request.getTestItemId() + ", username=" + request.getUsername());
-        TestResultResponse response = testResultService.getTestResult(request);
+    @PostMapping("/by-order")
+    public ResponseEntity<TestResultResponse> getTestResultByOrder(@RequestBody TestResultRequest request) {
+        System.out.println("Received request for test order: userId=" + request.getUserId() + ", testOrder=" + request.getTestOrder());
+        TestResultResponse response = testResultService.getTestResultByOrder(request);
         return ResponseEntity.ok(response);
     }
 }

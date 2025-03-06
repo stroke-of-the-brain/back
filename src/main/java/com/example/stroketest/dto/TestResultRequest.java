@@ -1,18 +1,8 @@
 package com.example.stroketest.dto;
 
 public class TestResultRequest {
-    private Long id;         // 추가
     private Long userId;
-    private Long testItemId;
-    private String username; // 추가
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
+    private Integer testOrder;  // 검사 순서 (1부터 시작)
 
     public Long getUserId() {
         return userId;
@@ -22,19 +12,11 @@ public class TestResultRequest {
         this.userId = userId;
     }
 
-    public Long getTestItemId() {
-        return testItemId;
+    public Integer getTestOrder() {
+        return testOrder;
     }
 
-    public void setTestItemId(Long testItemId) {
-        this.testItemId = testItemId;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
+    public void setTestOrder(Integer testOrder) {
+        this.testOrder = testOrder;
     }
 }
