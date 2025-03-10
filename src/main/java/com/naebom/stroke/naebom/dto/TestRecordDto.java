@@ -10,10 +10,13 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @Builder
 public class TestRecordDto {
-    private Long userId;
+    private Long memberId;
     private LocalDate testDate;
     private Double faceTestScore;
     private Double speechTestScore;
     private Double fingerTestScore;
     private Boolean strokeRisk;
+    private Integer testCount;
+    private String feedback;
+    private Double avgRiskScore;
 }

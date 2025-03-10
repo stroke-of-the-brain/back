@@ -26,7 +26,7 @@ public class Member {
     private LocalDate joinDate = LocalDate.now();
 
     @Column(nullable = false)
-    private String birthDate;
+    private LocalDate birthDate;
 
     @Column(nullable = false)
     private String gender;
@@ -44,8 +44,8 @@ public class Member {
     public void setIsGuest(Boolean isGuest) { this.isGuest = isGuest; }
     public LocalDate getJoinDate() { return joinDate; }
     public void setJoinDate(LocalDate joinDate) { this.joinDate = joinDate; }
-    public String getBirthDate() { return birthDate; }
-    public void setBirthDate(String birthDate) { this.birthDate = birthDate; }
+    public LocalDate getBirthDate() { return birthDate; }
+    public void setBirthDate(LocalDate birthDate) { this.birthDate = birthDate; }
     public String getGender() { return gender; }
     public void setGender(String gender) { this.gender = gender; }
 }

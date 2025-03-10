@@ -63,13 +63,16 @@ public class HospitalService {
 
             // 병원 정보 저장
             Map<String, Object> hospitalData = new HashMap<>();
+
+            String phoneNumber = Optional.ofNullable((String) details.get("formatted_phone_number")).orElse("전화번호 없음");
+
             hospitalData.put("name", hospital.get("name")); // 병원이름
             hospitalData.put("latitude", hospitalLat); // 병원 위도
             hospitalData.put("longitude", hospitalLng); // 병원 경도
-            hospitalData.put("address", details.get("formatted_address")); // 병원 주소
+            //hospitalData.put("address", details.get("formatted_address")); // 병원 주소
             hospitalData.put("phone_number", details.get("formatted_phone_number")); // 병원 전화번호
-            hospitalData.put("opening_hours", details.get("opening_hours")); // 병원 운영시간
-            hospitalData.put("distance_km", String.format("%.2f", distance)); // 사용자와 병원의 거리
+            //hospitalData.put("opening_hours", details.get("opening_hours")); // 병원 운영시간
+            //hospitalData.put("distance_km", String.format("%.2f", distance)); // 사용자와 병원의 거리
 
             processedHospitals.add(hospitalData);
         }
@@ -82,11 +85,12 @@ public class HospitalService {
 
     //Google Places API "details" (병원 상세 정보 가져오기)
     private Map<String, Object> getHospitalDetails(String placeId) {
-        if (placeId == null) return new HashMap<>();
+        if (placeId == null) return Map.of("formatted_phone_number", "전화번호 없음");
 
         String detailsUrl = UriComponentsBuilder.fromHttpUrl("https://maps.googleapis.com/maps/api/place/details/json")
                 .queryParam("place_id", placeId)
-                .queryParam("fields", "formatted_address,formatted_phone_number,opening_hours")
+                //.queryParam("fields", "formatted_address,formatted_phone_number,opening_hours")
+                .queryParam("fields", "formatted_phone_number")
                 .queryParam("language", "ko")
                 .queryParam("key", apiKey)
                 .toUriString();
@@ -97,7 +101,7 @@ public class HospitalService {
     }
 
     //Haversine 공식을 이용한 거리 계산 (단위: km)
-    private double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
+ private double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
         final int R = 6371; // 지구 반지름 (단위: km)
         double latDistance = Math.toRadians(lat2 - lat1);
         double lonDistance = Math.toRadians(lon2 - lon1);

@@ -3,6 +3,11 @@ spring:
     url: jdbc:mysql://localhost:3306/Naebom?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
     username: root
     password: 3003q300!
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 100MB  # 개별 파일 최대 크기 (Base64로 인코딩된 이미지 대비)
+      max-request-size: 200MB
   jpa:
     hibernate:
       ddl-auto: update

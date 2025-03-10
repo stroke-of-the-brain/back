@@ -25,6 +25,15 @@ public class TestRecord {
     @Column(nullable = false)
     private LocalDate testDate;
 
+    @Column(nullable = false)
+    private Integer testCount;  // 추가됨
+
+    @Column(columnDefinition = "TEXT")
+    private String feedback;    // 추가됨
+
+    @Column
+    private Double avgRiskScore; // 추가됨
+
     private Double faceTestScore;
     private Double speechTestScore;
     private Double fingerTestScore;
