@@ -37,6 +37,7 @@ public class TestRecord {
     private Double faceTestScore;
     private Double speechTestScore;
     private Double fingerTestScore;
+    private Double armTestScore;
 
     @Column(nullable = false)
     private Boolean strokeRisk;

@@ -15,6 +15,7 @@ public class TestRecordDto {
     private Double faceTestScore;
     private Double speechTestScore;
     private Double fingerTestScore;
+    private Double armTestScore;
     private Boolean strokeRisk;
     private Integer testCount;
     private String feedback;

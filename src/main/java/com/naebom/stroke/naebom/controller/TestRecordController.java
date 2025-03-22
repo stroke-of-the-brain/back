@@ -22,35 +22,6 @@ public class TestRecordController {
         TestRecordDto savedRecord = testRecordService.saveTestRecord(dto);
         return ResponseEntity.ok(savedRecord);
     }
-  /*  // ✅ 손가락 테스트 (fingerTestScore)만 저장
-    @PostMapping("/save-finger-score")
-    public ResponseEntity<String> saveFingerTestScore(@RequestBody Map<String, Object> request) {
-        Long memberId = ((Number) request.get("memberId")).longValue();
-        Double fingerTestScore = ((Number) request.get("fingerTestScore")).doubleValue();
-
-      *//*  testRecordService.saveFingerTestScore(memberId, fingerTestScore);*//*
-        return ResponseEntity.ok("Finger test score saved successfully.");
-    }*/
-
-    /*// ✅ AI에서 얼굴 검사 결과 (faceTestScore)를 받아 저장
-    @PostMapping("/save-face-score")
-    public ResponseEntity<String> saveFaceTestScore(@RequestBody Map<String, Object> request) {
-        Long memberId = ((Number) request.get("memberId")).longValue();
-        Double faceTestScore = ((Number) request.get("faceTestScore")).doubleValue();
-
-        testRecordService.saveFaceTestScore(memberId, faceTestScore);
-        return ResponseEntity.ok("Face test score saved successfully.");
-    }
-
-    // ✅ 발음 테스트 점수를 3번 저장 후, 평균 점수를 계산하여 저장
-    @PostMapping("/save-speech-score")
-    public ResponseEntity<String> saveSpeechTestScore(@RequestBody Map<String, Object> request) {
-        Long memberId = ((Number) request.get("memberId")).longValue();
-        Double speechTestScore = ((Number) request.get("speechTestScore")).doubleValue();
-
-        testRecordService.saveSpeechTestScore(memberId, speechTestScore);
-        return ResponseEntity.ok("Speech test score updated successfully.");
-    }*/
 
     //모든 검사 기록 조회
     @GetMapping("/history/{memberId}")
@@ -77,5 +48,38 @@ public class TestRecordController {
     public ResponseEntity<List<Map<String, Object>>> getSimpleTestHistory(@PathVariable Long memberId) {
         List<Map<String, Object>> history = testRecordService.getSimpleTestHistory(memberId);
         return ResponseEntity.ok(history);
+    }
+    //////////
+    @PostMapping("/save-face-score")
+    public ResponseEntity<?> saveFace(@RequestBody Map<String, Object> body) {
+        testRecordService.saveFaceTestScore(
+                Long.valueOf(body.get("memberId").toString()),
+                Double.valueOf(body.get("faceTestScore").toString()));
+        return ResponseEntity.ok("face 저장 완료");
+    }
+
+    @PostMapping("/save-finger-score")
+    public ResponseEntity<?> saveFinger(@RequestBody Map<String, Object> body) {
+        testRecordService.saveFingerTestScore(
+                Long.valueOf(body.get("memberId").toString()),
+                Double.valueOf(body.get("fingerTestScore").toString()));
+        return ResponseEntity.ok("finger 저장 완료");
+    }
+
+    @PostMapping("/save-arm-score")
+    public ResponseEntity<?> saveArm(@RequestBody Map<String, Object> body) {
+        testRecordService.saveArmTestScore(
+                Long.valueOf(body.get("memberId").toString()),
+                Double.valueOf(body.get("armMuscleScore").toString()));
+        return ResponseEntity.ok("arm 저장 완료");
+    }
+    @PostMapping("/save-feedback-risk")
+    public ResponseEntity<?> saveFeedbackAndRisk(@RequestBody Map<String, Object> body) {
+        Long memberId = Long.valueOf(body.get("memberId").toString());
+        //Boolean strokeRisk = Boolean.valueOf(body.get("strokeRisk").toString());
+        String feedback = body.get("feedback").toString();
+
+        testRecordService.saveFeedbackAndRisk(memberId, feedback);
+        return ResponseEntity.ok("피드백/위험도 저장 완료");
     }
 }

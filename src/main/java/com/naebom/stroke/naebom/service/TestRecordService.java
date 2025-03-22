@@ -5,10 +5,12 @@ import com.naebom.stroke.naebom.entity.Member;
 import com.naebom.stroke.naebom.entity.TestRecord;
 import com.naebom.stroke.naebom.repository.MemberRepository;
 import com.naebom.stroke.naebom.repository.TestRecordRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -54,6 +56,7 @@ public class TestRecordService {
                 dto.getFaceTestScore(),
                 dto.getSpeechTestScore(),
                 dto.getFingerTestScore(),
+                dto.getArmTestScore(),
                 dto.getStrokeRisk(),
                 testCount,
                 dto.getFeedback(), // 프론트에서 받은 feedback 전달
@@ -82,6 +85,7 @@ public class TestRecordService {
                         record.getFaceTestScore(),
                         record.getSpeechTestScore(),
                         record.getFingerTestScore(),
+                        record.getArmTestScore(),
                         record.getStrokeRisk(),
                         record.getTestCount(),
                         record.getFeedback(),
@@ -119,34 +123,74 @@ public List<Map<String, Object>> getSimpleTestHistory(Long memberId) {
                 })
                 .collect(Collectors.toList());
     }
-    /*//fingerTestScore(반응 속도 점수)만 저장하는 메서드 추가
-    public void saveFingerTestScore(Long memberId, Double fingerTestScore) {
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원 ID"));
 
-        TestRecord testRecord = TestRecord.builder()
-                .member(member)
-                .testDate(LocalDate.now()) // 현재 날짜 자동 저장
-                .fingerTestScore(fingerTestScore) // 반응 속도 점수 저장
-                .build();
+    //////////////////
+    private void updateAvgRiskScoreIfReady(TestRecord record) {
+        List<Double> scores = new ArrayList<>();
 
-        testRecordRepository.save(testRecord);
-    }*/
-   /* public void saveAiScore(Long memberId, Double score) {
-        //memberId를 이용해 Member 엔티티 조회
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원 ID"));
+        if (record.getFaceTestScore() != null) scores.add(record.getFaceTestScore());
+        if (record.getSpeechTestScore() != null) scores.add(record.getSpeechTestScore());
+        if (record.getFingerTestScore() != null) scores.add(record.getFingerTestScore());
+        if (record.getArmTestScore() != null) scores.add(record.getArmTestScore());
 
-        //빌더 패턴에서 member 객체를 설정
-        TestRecord testRecord = TestRecord.builder()
-                .member(member)  //memberId가 아니라 member 객체를 전달해야 함
-                .testDate(LocalDate.now())
-                .faceTestScore(score)
-                .strokeRisk(false) // 기본 값 설정
-                .testCount(1)  // 기본 값 설정
-                .build();
+        if (scores.size() == 4) {
+          //  double avg = scores.stream().mapToDouble(Double::doubleValue).average().orElse(0);
+            double total = record.getFaceTestScore()
+                    + record.getSpeechTestScore()
+                    + record.getFingerTestScore()
+                    + record.getArmTestScore();
 
-        testRecordRepository.save(testRecord);
-        System.out.println("AI Score saved: " + score);
-    }*/
+            double avg = total / 3;
+            record.setAvgRiskScore(Math.round((100 - avg) * 10.0) / 10.0);
+        }
+    }
+    @Transactional
+    public void saveFaceTestScore(Long memberId, Double score) {
+        TestRecord record = getLatestRecord(memberId);
+        record.setFaceTestScore(score);
+        updateAvgRiskScoreIfReady(record);
+    }
+    @Transactional
+    public void saveFingerTestScore(Long memberId, Double score) {
+        TestRecord record = getLatestRecord(memberId);
+        record.setFingerTestScore(score);
+        updateAvgRiskScoreIfReady(record);
+    }
+    @Transactional
+    public void saveArmTestScore(Long memberId, Double score) {
+        TestRecord record = getLatestRecord(memberId);
+        record.setArmTestScore(score);
+        updateAvgRiskScoreIfReady(record);
+    }
+
+    @Transactional
+    public void saveSpeechTestScore(Long memberId, Double avgScore) {
+        TestRecord record = getLatestRecord(memberId);
+        record.setSpeechTestScore(avgScore);
+        updateAvgRiskScoreIfReady(record);
+    }
+    @Transactional
+    public void saveFeedbackAndRisk(Long memberId, String feedback) {
+        TestRecord record = getLatestRecord(memberId);
+        record.setFeedback(feedback);
+    }
+
+    private TestRecord getLatestRecord(Long memberId) {
+        return testRecordRepository.findByMemberIdOrderByTestDateDesc(memberId)
+                .stream()
+                .findFirst()
+                .orElseGet(() -> {
+                    Member member = memberRepository.findById(memberId)
+                            .orElseThrow(() -> new RuntimeException("존재하지 않는 회원입니다."));
+                    TestRecord newRecord = TestRecord.builder()
+                            .member(member)
+                            .testDate(LocalDate.now())
+                            .testCount(testRecordRepository.countByMemberId(memberId) + 1)
+                            .strokeRisk(false)
+                            .build();
+                    return testRecordRepository.save(newRecord);
+                });
+    }
+
+
 }

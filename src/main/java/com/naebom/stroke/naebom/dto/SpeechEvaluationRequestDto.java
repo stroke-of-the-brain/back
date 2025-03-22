@@ -7,6 +7,8 @@ import lombok.Setter;
 @Getter
 @Setter
 public class SpeechEvaluationRequestDto {
+    @JsonProperty("memberId")
+    private Long memberId;
 
     @JsonProperty("expectedText")
     private String expectedText;
