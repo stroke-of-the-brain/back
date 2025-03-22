@@ -21,7 +21,7 @@ public class TestRecordService {
     private final TestRecordRepository testRecordRepository;
     private final MemberRepository memberRepository;
 
-    // ✅ 검사 결과 저장 (testCount, avgRiskScore 자동 추가, feedback은 프론트에서 받음)
+    //검사 결과 저장 (testCount, avgRiskScore 자동 추가, feedback은 프론트에서 받음)
     public TestRecordDto saveTestRecord(TestRecordDto dto) {
         Member member = memberRepository.findById(dto.getMemberId())
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원 ID"));
@@ -30,7 +30,9 @@ public class TestRecordService {
         int testCount = testRecordRepository.countByMemberId(dto.getMemberId()) + 1;
 
         // 평균 뇌졸중 위험 확률 계산
-        Double avgRiskScore = (dto.getFaceTestScore() + dto.getSpeechTestScore() + dto.getFingerTestScore()) / 3;
+        /*Double avgRiskScore = 100 -(dto.getFaceTestScore() + dto.getSpeechTestScore() + dto.getFingerTestScore()) / 3;*/
+        Double avgRiskScore = Math.round((100 - ((dto.getFaceTestScore() + dto.getSpeechTestScore() + dto.getFingerTestScore()) / 3)) * 10.0) / 10.0;
+
 
         TestRecord testRecord = TestRecord.builder()
                 .member(member)
@@ -59,19 +61,19 @@ public class TestRecordService {
         );
     }
 
-    // ✅ 모든 검사 기록 조회
+    //모든 검사 기록 조회
     public List<TestRecordDto> getTestHistory(Long memberId) {
         List<TestRecord> records = testRecordRepository.findByMemberIdOrderByTestDateDesc(memberId);
         return convertToDto(records);
     }
 
-    // ✅ 최근 2개의 검사 기록 조회
+    //최근 2개의 검사 기록 조회
     public List<TestRecordDto> getRecentTwoTestRecords(Long memberId) {
         List<TestRecord> records = testRecordRepository.findRecentTestRecords(memberId);
         return convertToDto(records);
     }
 
-    // ✅ 중복된 변환 로직을 메서드로 따로 분리
+    //중복된 변환 로직을 메서드로 따로 분리
     private List<TestRecordDto> convertToDto(List<TestRecord> records) {
         return records.stream()
                 .map(record -> new TestRecordDto(
@@ -87,13 +89,13 @@ public class TestRecordService {
                 ))
                 .collect(Collectors.toList());
     }
-    // ✅ 최근 2개의 검사 기록 조회 (간단한 데이터만 반환)
+    //최근 2개의 검사 기록 조회 (간단한 데이터만 반환)
     public List<Map<String, Object>> getRecentTwoSimpleTestRecords(Long memberId) {
         List<TestRecord> records = testRecordRepository.findRecentTestRecords(memberId);
         return convertToSimpleDto(records);
     }
 
-// ✅ 모든 검사 기록 조회 (간단한 데이터만 반환)
+//모든 검사 기록 조회 (간단한 데이터만 반환)
 public List<Map<String, Object>> getSimpleTestHistory(Long memberId) {
     List<TestRecord> records = testRecordRepository.findByMemberIdOrderByTestDateDesc(memberId);
     return convertToSimpleDto(records);
@@ -111,13 +113,13 @@ public List<Map<String, Object>> getSimpleTestHistory(Long memberId) {
                         result.put("feedback", record.getFeedback());
                     }
                     if (record.getTestCount() != null) {
-                        result.put("testCount", record.getTestCount()); // ✅ test_count 추가
+                        result.put("testCount", record.getTestCount()); // test_count 추가
                     }
                     return result;
                 })
                 .collect(Collectors.toList());
     }
-    // ✅ fingerTestScore(반응 속도 점수)만 저장하는 메서드 추가
+    /*//fingerTestScore(반응 속도 점수)만 저장하는 메서드 추가
     public void saveFingerTestScore(Long memberId, Double fingerTestScore) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원 ID"));
@@ -129,5 +131,22 @@ public List<Map<String, Object>> getSimpleTestHistory(Long memberId) {
                 .build();
 
         testRecordRepository.save(testRecord);
-    }
+    }*/
+   /* public void saveAiScore(Long memberId, Double score) {
+        //memberId를 이용해 Member 엔티티 조회
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원 ID"));
+
+        //빌더 패턴에서 member 객체를 설정
+        TestRecord testRecord = TestRecord.builder()
+                .member(member)  //memberId가 아니라 member 객체를 전달해야 함
+                .testDate(LocalDate.now())
+                .faceTestScore(score)
+                .strokeRisk(false) // 기본 값 설정
+                .testCount(1)  // 기본 값 설정
+                .build();
+
+        testRecordRepository.save(testRecord);
+        System.out.println("AI Score saved: " + score);
+    }*/
 }

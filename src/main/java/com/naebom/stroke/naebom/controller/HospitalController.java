@@ -18,6 +18,10 @@ public class HospitalController {
 
     @PostMapping("/nearby")
     public List<Map<String, Object>> getNearbyHospitals(@RequestBody Map<String, Double> locationData) {
+        if (locationData == null || !locationData.containsKey("latitude") || !locationData.containsKey("longitude")) {
+            throw new IllegalArgumentException("latitude와 longitude 값이 필요합니다.");
+        }
+
         double latitude = locationData.get("latitude");
         double longitude = locationData.get("longitude");
 

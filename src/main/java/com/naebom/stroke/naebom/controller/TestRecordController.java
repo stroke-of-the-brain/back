@@ -22,15 +22,15 @@ public class TestRecordController {
         TestRecordDto savedRecord = testRecordService.saveTestRecord(dto);
         return ResponseEntity.ok(savedRecord);
     }
-    // ✅ 손가락 테스트 (fingerTestScore)만 저장
+  /*  // ✅ 손가락 테스트 (fingerTestScore)만 저장
     @PostMapping("/save-finger-score")
     public ResponseEntity<String> saveFingerTestScore(@RequestBody Map<String, Object> request) {
         Long memberId = ((Number) request.get("memberId")).longValue();
         Double fingerTestScore = ((Number) request.get("fingerTestScore")).doubleValue();
 
-        testRecordService.saveFingerTestScore(memberId, fingerTestScore);
+      *//*  testRecordService.saveFingerTestScore(memberId, fingerTestScore);*//*
         return ResponseEntity.ok("Finger test score saved successfully.");
-    }
+    }*/
 
     /*// ✅ AI에서 얼굴 검사 결과 (faceTestScore)를 받아 저장
     @PostMapping("/save-face-score")
